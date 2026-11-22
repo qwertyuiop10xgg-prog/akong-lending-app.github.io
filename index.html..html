@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lending ledger</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700&display=swap">
+<style>
+:root{--bg:#eef2ef;--sf:#fff;--ink:#14261f;--mu:#5b6b63;--ln:#d4ddd7;--ac:#0f6b54;--acx:#fff;--wn:#a35f00;--bd:#b3261e;--ok:#0f6b54;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0f1714;--sf:#17221d;--ink:#e6efe9;--mu:#9bb0a5;--ln:#2a3a32;--ac:#4cc9a0;--acx:#08140f;--wn:#e0a43a;--bd:#ff7a6e;--ok:#4cc9a0}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0f1714;--sf:#17221d;--ink:#e6efe9;--mu:#9bb0a5;--ln:#2a3a32;--ac:#4cc9a0;--acx:#08140f;--wn:#e0a43a;--bd:#ff7a6e;--ok:#4cc9a0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:28px;margin:0 0 2px;letter-spacing:-.02em}
+.sub{color:var(--mu);margin:0 0 18px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
+@media(min-width:620px){.stats{grid-template-columns:repeat(4,1fr)}}
+.st{background:var(--sf);border:1px solid var(--ln);border-radius:10px;padding:10px 12px}
+.st b{display:block;font-size:20px;letter-spacing:-.01em}
+.st span{color:var(--mu);font-size:13px}
+.panel{background:var(--sf);border:1px solid var(--ln);border-radius:10px;padding:14px;margin-bottom:18px}
+.panel h2{font-size:16px;margin:0 0 10px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row .wide{grid-column:1/-1}
+label{display:block;font-size:13px;color:var(--mu);margin-bottom:3px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--ln);border-radius:8px;padding:9px 10px}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--ln);background:var(--sf);color:var(--ink);padding:8px 12px}
+button.p{background:var(--ac);color:var(--acx);border-color:var(--ac);font-weight:700}
+button.d{color:var(--bd)}
+button.s{padding:5px 9px;font-size:14px}
+.prev{margin:10px 0;color:var(--mu);font-size:14px;min-height:20px}
+.prev b{color:var(--ink)}
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.grp{margin-bottom:18px}
+.gh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:0 2px 6px;font-weight:700}
+.gh small{font-weight:400;color:var(--mu)}
+.gh .late{color:var(--bd)}.gh .soon{color:var(--wn)}
+.card{background:var(--sf);border:1px solid var(--ln);border-left:4px solid var(--ac);border-radius:10px;padding:12px;margin-bottom:8px}
+.card.over{border-left-color:var(--bd)}.card.today{border-left-color:var(--wn)}.card.paid{border-left-color:var(--ln);opacity:.85}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.nm{font-weight:700;font-size:17px}
+.meta{color:var(--mu);font-size:14px}
+.owe{text-align:right}.owe b{font-size:20px;display:block}
+.owe span{font-size:13px;color:var(--mu)}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.pays{margin:10px 0 0;padding:0;list-style:none;font-size:14px;color:var(--mu)}
+.pays li{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-top:1px dashed var(--ln)}
+.pf{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:10px;align-items:end}.wk{margin:10px 0 0;padding:0;list-style:none;font-size:14px}.wk li{display:flex;justify-content:space-between;padding:3px 0;border-top:1px dashed var(--ln)}.wk .ok{color:var(--ok)}.wk .bad{color:var(--bd)}
+.empty{text-align:center;color:var(--mu);padding:28px 10px;border:1px dashed var(--ln);border-radius:10px}
+.tag{display:inline-block;font-size:12px;padding:1px 7px;border-radius:99px;border:1px solid currentColor;margin-left:6px;vertical-align:middle}
+.tag.over{color:var(--bd)}.tag.today{color:var(--wn)}.tag.paid{color:var(--ok)}
+textarea{min-height:90px;font:13px ui-monospace,Menlo,monospace}
+.note{font-size:13px;color:var(--mu);margin:8px 0 0}
+.calh{display:flex;align-items:center;gap:8px;margin-bottom:8px}.calh b{flex:1;text-align:center;font-size:17px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-bottom:12px}
+.dow{text-align:center;font-size:12px;color:var(--mu)}
+.day{min-height:76px;padding:4px;display:flex;flex-direction:column;gap:2px;align-items:stretch;text-align:left;border-radius:6px;background:var(--sf);overflow:hidden;font-size:12px}
+.day.out{opacity:.45}.day.tdy{border-color:var(--wn)}.day.sel{outline:2px solid var(--ac);outline-offset:-1px}
+.dn{font-size:12px;color:var(--mu)}
+.chip{font-size:11px;line-height:1.25;padding:1px 3px;border-radius:3px;border-left:3px solid var(--ac);background:var(--bg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip.paid{border-color:var(--ok);text-decoration:line-through;opacity:.7}.chip.late{border-color:var(--bd)}.chip.now{border-color:var(--wn)}
+.more{font-size:11px;color:var(--mu)}.dt{font-size:10px;font-weight:700;margin-top:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.leg{font-size:13px;color:var(--mu);margin:0 0 12px;display:flex;gap:12px;flex-wrap:wrap}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<main>
+<h1>Lending ledger</h1>
+<p class="sub">Weekly interest to collect, and principal still out.</p>
+<div class="stats" id="stats"></div>
+
+<section class="panel">
+<h2>New loan</h2>
+<div class="row">
+<div class="wide"><label for="nm">Borrower</label><input id="nm" placeholder="Name" autocomplete="off"></div>
+<div><label for="am">Amount lent (₱)</label><input id="am" type="number" inputmode="decimal" min="0" step="any"></div>
+<div><label for="dt">Date lent</label><input id="dt" type="date"></div>
+<div><label for="rt">Interest per week (%)</label><input id="rt" type="number" inputmode="decimal" value="10" step="any"></div>
+<div><label for="nt">Note (optional)</label><input id="nt" autocomplete="off"></div>
+</div>
+<div class="prev" id="prev"></div>
+<button class="p" id="add">Add loan</button>
+</section>
+
+<div class="tabs" role="group" aria-label="View">
+<button data-tab="sched" aria-pressed="true">To collect</button>
+<button data-tab="cal" aria-pressed="false">Calendar</button>
+<button data-tab="paid" aria-pressed="false">Paid</button>
+<button data-tab="set" aria-pressed="false">Backup</button>
+</div>
+<div id="view"></div>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const KEY='lending-ledger-v2';
+let S={loans:[]},tab='sched',openPay=null,openWk=null,armed=null,calSel=null,calYM=null;
+const norm=l=>Object.assign({ints:[],prin:[]},l);
+try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);if(o&&Array.isArray(o.loans))S.loans=o.loans.map(norm)}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const pd=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
+const ds=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const tod=()=>ds(new Date());
+const add=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return ds(d)};
+const diff=(a,b)=>Math.round((pd(b)-pd(a))/864e5);
+const nice=s=>pd(s).toLocaleDateString('en-PH',{weekday:'short',month:'short',day:'numeric'});
+const nice2=s=>pd(s).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});
+const peso=n=>'₱'+n.toLocaleString('en-PH',{minimumFractionDigits:Math.abs(n%1)>.004?2:0,maximumFractionDigits:2});
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sum=a=>a.reduce((t,p)=>t+p.a,0);
+const prinNow=l=>Math.max(0,l.amt-sum(l.prin));
+function weeks(l,until){
+  const t=tod(),paid=sum(l.ints);
+  const P=prinNow(l)<=.005&&l.prin.length?l.prin.map(p=>p.d).sort().pop():null;
+  const N=P?Math.max(1,Math.ceil(diff(l.date,P)/7)):Math.max(1,Math.floor(diff(l.date,until&&until>t?until:t)/7)+1);
+  const out=[];let cum=0;
+  let any=false;
+  for(let k=1;k<=N||(!P&&!any&&k<=N+520);k++){
+    const st=add(l.date,7*(k-1));
+    const pr=Math.max(0,l.amt-sum(l.prin.filter(p=>p.d<st||(k>1&&p.d===st))));
+    const amt=pr*l.rate/100;cum+=amt;
+    const rem=Math.min(amt,Math.max(0,cum-paid));if(rem>.004)any=true;
+    out.push({k,due:add(l.date,7*k),amt,cum,rem});
+  }
+  return out;
+}
+function info(l){
+  const W=weeks(l),t=tod(),open=W.filter(w=>w.rem>.004);
+  const over=open.filter(w=>w.due<t);
+  return{W,open,next:open[0],closed:prinNow(l)<=.005&&open.length===0,overAmt:sum(over.map(w=>({a:w.rem}))),ovN:over.length,prin:prinNow(l),paidInt:sum(l.ints)};
+}
+function status(l,i){
+  if(i.closed)return'paid';
+  if(i.overAmt>0)return'over';
+  return i.next.due===tod()?'today':'soon';
+}
+function rel(s){
+  const d=diff(tod(),s);
+  return d===0?'Due today':d===1?'Tomorrow':d>1?'In '+d+' days':(-d)+(d===-1?' day late':' days late');
+}
+function payoff(l){
+  const c=Object.assign({},l,{prin:l.prin.concat(prinNow(l)>.005?[{d:tod(),a:prinNow(l)}]:[])});
+  const W=weeks(c);
+  return{p:prinNow(l),i:Math.max(0,W[W.length-1].cum-sum(l.ints))};
+}
+function stats(){
+  const t=tod(),end=add(t,6);let out=0,soon=0,ov=0,ovN=0,earn=0;
+  S.loans.forEach(l=>{
+    const i=info(l);earn+=i.paidInt;
+    if(i.closed)return;
+    out+=i.prin;ov+=i.overAmt;if(i.overAmt>0)ovN++;
+    i.open.filter(w=>w.due>=t&&w.due<=end).forEach(w=>soon+=w.rem);
+  });
+  $('#stats').innerHTML=
+   `<div class="st"><b>${peso(out)}</b><span>Principal out</span></div>`+
+   `<div class="st"><b>${peso(soon)}</b><span>Interest due in 7 days</span></div>`+
+   `<div class="st"><b style="color:${ovN?'var(--bd)':'inherit'}">${peso(ov)}</b><span>Overdue (${ovN})</span></div>`+
+   `<div class="st"><b>${peso(earn)}</b><span>Interest received</span></div>`;
+}
+function card(l){
+  const i=info(l),st=status(l,i),open=openPay===l.id,wk=openWk===l.id;
+  const tag=st==='over'?'<span class="tag over">Overdue</span>':st==='today'?'<span class="tag today">Due today</span>':st==='paid'?'<span class="tag paid">Paid</span>':'';
+  let big,lab,line='';
+  if(st==='paid'){big=peso(i.paidInt);lab='interest received'}
+  else if(i.overAmt>0){big=peso(i.overAmt);lab=i.ovN+(i.ovN>1?' weeks':' week')+' overdue'}
+  else{big=peso(i.next.rem);lab='interest due'}
+  if(st!=='paid'){
+    line=`Next interest due ${nice(i.next.due)} · ${rel(i.next.due).toLowerCase()}`;
+    if(!i.prin)line='Principal repaid · interest still owed';
+  }
+  const po=payoff(l);
+  const pays=l.ints.map((p,x)=>({t:'Interest',d:p.d,a:p.a,x,k:'int'})).concat(l.prin.map((p,x)=>({t:'Principal',d:p.d,a:p.a,x,k:'prin'}))).sort((a,b)=>a.d.localeCompare(b.d));
+  const due0=i.overAmt>0?i.overAmt:(i.next?i.next.rem:0);
+  return `<div class="card ${st==='soon'?'':st}">
+  <div class="top"><div><div class="nm">${esc(l.name)}${tag}</div>
+  <div class="meta">${peso(l.amt)} lent ${nice2(l.date)} · ${l.rate}% = ${peso(l.amt*l.rate/100)}/wk</div>
+  ${l.note?`<div class="meta">${esc(l.note)}</div>`:''}</div>
+  <div class="owe"><b>${big}</b><span>${lab}</span></div></div>
+  ${st!=='paid'?`<div class="meta" style="margin-top:6px">${line}<br>Principal still out: ${peso(i.prin)} · pay off today: ${peso(po.p+po.i)}</div>`:''}
+  ${wk?`<ul class="wk">${i.W.map(w=>{const c=w.rem<=.004?'ok':w.due<tod()?'bad':'';return `<li class="${c}"><span>Week ${w.k} · ${nice(w.due)}</span><span>${peso(w.amt)} · ${w.rem<=.004?'paid':(w.rem<w.amt-.004?peso(w.rem)+' left':'unpaid')}</span></li>`}).join('')}</ul>`:''}
+  ${pays.length?`<ul class="pays">${pays.map(p=>`<li><span>${nice2(p.d)} · ${p.t} ${peso(p.a)}</span><button class="s d" data-act="delpay" data-id="${l.id}" data-k="${p.k}" data-i="${p.x}" aria-label="Remove payment">Remove</button></li>`).join('')}</ul>`:''}
+  ${open?`<div class="pf"><div><label>Type</label><select id="pt"><option value="int">Interest</option><option value="prin">Principal</option></select></div><div><label>Amount (₱)</label><input id="pa" type="number" inputmode="decimal" step="any" value="${due0>0?due0.toFixed(2):''}"></div><div><label>Date paid</label><input id="pdt" type="date" value="${tod()}"></div><button class="p" data-act="savepay" data-id="${l.id}">Save</button></div>`:''}
+  <div class="acts">
+  ${st!=='paid'?`<button class="s" data-act="pay" data-id="${l.id}">${open?'Cancel':'Record payment'}</button><button class="s p" data-act="full" data-id="${l.id}">Paid in full</button>`:''}
+  <button class="s" data-act="wk" data-id="${l.id}">${wk?'Hide weeks':'Weekly schedule'}</button>
+  <button class="s d" data-act="del" data-id="${l.id}">${armed===l.id?'Tap again to delete':'Delete'}</button>
+  </div></div>`;
+}
+const cls=w=>w.rem<=.004?'paid':w.due<tod()?'late':w.due===tod()?'now':'up';
+function calHtml(){
+  const t=tod();
+  if(!calSel)calSel=t;
+  if(!calYM)calYM=t.slice(0,7);
+  const y=+calYM.slice(0,4),m=+calYM.slice(5,7);
+  const first=new Date(y,m-1,1),last=new Date(y,m,0);
+  const start=add(ds(first),-first.getDay()),end=add(ds(last),6-last.getDay());
+  const ev={};let up=0,got=0;
+  S.loans.forEach(l=>{
+    const paid=sum(l.ints);
+    weeks(l,end).forEach(w=>{
+      if(w.due<start||w.due>end||w.amt<=.004)return;
+      (ev[w.due]=ev[w.due]||[]).push({l,w,first:(w.cum-w.amt)<=paid+.005});
+      if(w.due.slice(0,7)===calYM){got+=w.amt-w.rem;up+=w.rem}
+    });
+  });
+  let cells='';
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>cells+=`<div class="dow">${d}</div>`);
+  for(let d=start;d<=end;d=add(d,1)){
+    const es=ev[d]||[],tot=es.reduce((s,e)=>s+e.w.amt,0);
+    cells+=`<button class="day${d.slice(0,7)!==calYM?' out':''}${d===t?' tdy':''}${d===calSel?' sel':''}" data-act="day" data-d="${d}" aria-label="${nice2(d)}${es.length?', '+es.length+' payments':''}"><span class="dn">${+d.slice(8)}</span>${es.slice(0,3).map(e=>`<span class="chip ${cls(e.w)}">${esc(e.l.name)}</span>`).join('')}${es.length>3?`<span class="more">+${es.length-3} more</span>`:''}${tot?`<span class="dt">${peso(tot)}</span>`:''}</button>`;
+  }
+  const sel=(ev[calSel]||[]);
+  const lab={paid:'Paid',late:'Late',now:'Due today',up:'Scheduled'};
+  const det=sel.length?sel.map(e=>{const c=cls(e.w);return `<div class="card ${c==='late'?'over':c==='now'?'today':c==='paid'?'paid':''}"><div class="top"><div><div class="nm">${esc(e.l.name)}<span class="tag ${c==='late'?'over':c==='now'?'today':c==='paid'?'paid':''}">${lab[c]}</span></div><div class="meta">Week ${e.w.k} interest · principal ${peso(prinNow(e.l))}</div></div><div class="owe"><b>${peso(e.w.amt)}</b><span>${e.w.rem>.004&&e.w.rem<e.w.amt-.004?peso(e.w.rem)+' left':'interest'}</span></div></div>${e.w.rem>.004&&e.first?`<div class="acts"><button class="s p" data-act="calpay" data-id="${e.l.id}" data-a="${e.w.rem.toFixed(2)}">Mark ${peso(e.w.rem)} paid</button></div>`:''}${e.w.rem>.004&&!e.first?'<div class="meta" style="margin-top:6px">Earlier weeks must be paid first.</div>':''}</div>`}).join(''):'<div class="empty">No payments scheduled on this day.</div>';
+  return `<div class="calh"><button class="s" data-act="cal" data-n="-1" aria-label="Previous month">Prev</button><b>${first.toLocaleDateString('en-PH',{month:'long',year:'numeric'})}</b><button class="s" data-act="cal" data-n="0">Today</button><button class="s" data-act="cal" data-n="1" aria-label="Next month">Next</button></div>
+  <p class="leg"><span>This month: <b style="color:var(--ink)">${peso(up)}</b> to collect · <b style="color:var(--ink)">${peso(got)}</b> received</span></p>
+  <div class="cal">${cells}</div>
+  <p class="leg"><span><i style="background:var(--ac)"></i>Scheduled</span><span><i style="background:var(--wn)"></i>Due today</span><span><i style="background:var(--bd)"></i>Late</span><span><i style="background:var(--ok)"></i>Paid</span></p>
+  <div class="gh"><span>${nice2(calSel)}</span><small>${peso(sel.reduce((s,e)=>s+e.w.amt,0))}</small></div>${det}`;
+}
+function render(){
+  stats();
+  document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===tab));
+  const v=$('#view'),t=tod();
+  const all=S.loans.map(l=>({l,i:info(l)}));
+  if(tab==='sched'){
+    const act=all.filter(x=>!x.i.closed&&x.i.next).sort((a,b)=>a.i.next.due.localeCompare(b.i.next.due));
+    if(!act.length){v.innerHTML='<div class="empty">Nothing to collect. Add a loan above and its interest dates show up here.</div>';return}
+    const g={};act.forEach(x=>(g[x.i.next.due]=g[x.i.next.due]||[]).push(x));
+    v.innerHTML=Object.keys(g).sort().map(d=>{
+      const c=d<t?'late':diff(t,d)<=1?'soon':'';
+      const tot=g[d].reduce((s,x)=>s+(x.i.overAmt>0?x.i.overAmt:x.i.next.rem),0);
+      return `<div class="grp"><div class="gh"><span>${nice(d)} <small class="${c}">${rel(d)}</small></span><small>${peso(tot)}</small></div>${g[d].map(x=>card(x.l)).join('')}</div>`;
+    }).join('');
+  }else if(tab==='cal'){
+    v.innerHTML=calHtml();
+  }else if(tab==='paid'){
+    const last=l=>l.ints.concat(l.prin).map(p=>p.d).sort().pop()||'';
+    const p=all.filter(x=>x.i.closed).sort((a,b)=>last(b.l).localeCompare(last(a.l)));
+    v.innerHTML=p.length?p.map(x=>card(x.l)).join(''):'<div class="empty">No fully paid loans yet.</div>';
+  }else{
+    v.innerHTML=`<section class="panel"><h2>How the math works</h2>
+    <p class="note" style="margin:0">Interest is the rate times the principal still out, due every 7 days from the date lent. A loan is paid once all principal is returned and the interest up to that week is paid. If principal is returned mid-week, that week’s interest is still counted in full.</p></section>
+    <section class="panel"><h2>Backup</h2>
+    <p class="note" style="margin:0 0 8px">Your data lives in this browser only. Copy the text below and keep it somewhere safe. To restore, paste it back and tap Restore.</p>
+    <textarea id="bk" spellcheck="false">${esc(JSON.stringify(S))}</textarea>
+    <div class="acts"><button class="s" data-act="copy">Copy backup</button><button class="s p" data-act="restore">Restore from text</button></div>
+    <p class="note" id="bkmsg"></p></section>`;
+  }
+}
+function prev(){
+  const a=parseFloat($('#am').value),r=parseFloat($('#rt').value),d=$('#dt').value;
+  $('#prev').innerHTML=(a>0&&d&&r>=0)?`Collect <b>${peso(a*r/100)}</b> interest every 7 days, first on <b>${nice(add(d,7))}</b>. Principal ${peso(a)} comes back whenever they can pay it.`:'';
+}
+$('#dt').value=tod();
+['am','rt','dt'].forEach(i=>$('#'+i).addEventListener('input',prev));
+$('#add').onclick=()=>{
+  const name=$('#nm').value.trim(),amt=parseFloat($('#am').value),rate=parseFloat($('#rt').value),date=$('#dt').value;
+  if(!name||!(amt>0)||!date||!(rate>=0)){$('#prev').innerHTML='<b style="color:var(--bd)">Enter a name, an amount above zero, and a date.</b>';return}
+  S.loans.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),name,amt,rate,date,note:$('#nt').value.trim(),ints:[],prin:[]});
+  save();$('#nm').value='';$('#am').value='';$('#nt').value='';$('#dt').value=tod();prev();tab='sched';render();
+};
+document.querySelector('.tabs').onclick=e=>{const b=e.target.closest('button');if(b){tab=b.dataset.tab;render()}};
+$('#view').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-act]');if(!b)return;
+  const act=b.dataset.act,l=S.loans.find(x=>x.id===b.dataset.id);
+  if(act==='day'){calSel=b.dataset.d}
+  else if(act==='cal'){const n=+b.dataset.n;if(n===0){calYM=tod().slice(0,7);calSel=tod()}else{calYM=ds(new Date(+calYM.slice(0,4),+calYM.slice(5,7)-1+n,1)).slice(0,7)}}
+  else if(act==='calpay'){const a=parseFloat(b.dataset.a);if(a>0){l.ints.push({d:tod(),a});save()}}
+  else if(act==='pay'){openPay=openPay===l.id?null:l.id;armed=null}
+  else if(act==='wk'){openWk=openWk===l.id?null:l.id}
+  else if(act==='savepay'){
+    const a=parseFloat($('#pa').value),d=$('#pdt').value,k=$('#pt').value;
+    if(!(a>0)||!d)return;
+    if(k==='prin'){const m=Math.min(a,prinNow(l));if(m>0)l.prin.push({d,a:m})}else l.ints.push({d,a});
+    openPay=null;save();
+  }else if(act==='full'){
+    const po=payoff(l);
+    if(po.p>.005)l.prin.push({d:tod(),a:po.p});
+    const r=Math.max(0,weeks(l).slice(-1)[0].cum-sum(l.ints));
+    if(r>.005)l.ints.push({d:tod(),a:r});
+    openPay=null;save();
+  }else if(act==='delpay'){l[b.dataset.k].splice(+b.dataset.i,1);save()}
+  else if(act==='del'){
+    if(armed===l.id){S.loans=S.loans.filter(x=>x!==l);armed=null;save()}else armed=l.id;
+  }else if(act==='copy'){
+    const t=$('#bk');t.select();let ok=false;
+    try{navigator.clipboard.writeText(t.value);ok=true}catch(x){try{ok=document.execCommand('copy')}catch(y){}}
+    $('#bkmsg').textContent=ok?'Copied.':'Select the text and copy it manually.';return;
+  }else if(act==='restore'){
+    try{const o=JSON.parse($('#bk').value);if(!o||!Array.isArray(o.loans))throw 0;S={loans:o.loans.map(norm)};save();render();$('#bkmsg').textContent='Restored '+S.loans.length+' loans.'}
+    catch(x){$('#bkmsg').textContent='That text isn’t a valid backup.'}
+    return;
+  }
+  render();
+});
+prev();render();
+</script>
+</body>
+</html>
